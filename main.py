@@ -3,7 +3,11 @@ from pydantic import BaseModel
 import requests
 from fastapi.responses import HTMLResponse
 
+
+
+
 app = FastAPI()
+
 
 class ChatRequest(BaseModel):
     session_id: str
