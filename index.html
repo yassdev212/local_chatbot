@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My AI Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #343541; color: white; display: flex; justify-content: center; padding: 20px; }
+        .chat-container { width: 100%; max-width: 600px; background: #444654; border-radius: 10px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .chat-box { height: 400px; overflow-y: auto; margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .message { padding: 10px 15px; border-radius: 5px; max-width: 80%; }
+        .user-msg { background: #0b93f6; align-self: flex-end; }
+        .ai-msg { background: #555769; align-self: flex-start; }
+        .input-area { display: flex; gap: 10px; }
+        input { flex: 1; padding: 10px; border-radius: 5px; border: none; outline: none; }
+        button { padding: 10px 20px; background: #10a37f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0e8c6d; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h2 style="text-align: center; margin-top: 0;"> Local Llama 3.2</h2>
+        
+        <div class="chat-box" id="chatBox">
+            <div class="message ai-msg">Hello! I am your local AI. How can I help you today?</div>
+        </div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="handleEnter(event)">
+            <button onclick="sendMessage()" id="sendBtn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        
+        const sessionId = "user_" + Math.random().toString(36).substring(7);
+
+        async function sendMessage() {
+            const inputField = document.getElementById("userInput");
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            
+            addMessageToScreen(message, "user-msg");
+            inputField.value = ""; 
+            
+           
+            const loadingId = addMessageToScreen("Thinking...", "ai-msg");
+
+            
+           const response = await fetch("https://YOUR-NGROK-LINK.ngrok.app/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ session_id: sessionId, message: message })
+            });
+
+            
+            const data = await response.json();
+            document.getElementById(loadingId).innerText = data.reply;
+        }
+
+        function addMessageToScreen(text, className) {
+            const chatBox = document.getElementById("chatBox");
+            const msgDiv = document.createElement("div");
+            msgDiv.className = "message " + className;
+            msgDiv.innerText = text;
+            
+            
+            const id = "msg_" + Math.random().toString(36).substring(7);
+            msgDiv.id = id;
+            
+            chatBox.appendChild(msgDiv);
+            chatBox.scrollTop = chatBox.scrollHeight; 
+            return id;
+        }
+
+       
+        function handleEnter(event) {
+            if (event.key === "Enter") sendMessage();
+        }
+    </script>
+</body>
+</html>
